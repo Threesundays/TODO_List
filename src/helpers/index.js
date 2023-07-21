@@ -1,2 +1,2 @@
-export * from './searchUtils';
-export * from './sortUtils';
+
+export * from './sort-utils';

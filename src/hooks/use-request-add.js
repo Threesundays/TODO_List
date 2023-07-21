@@ -1,17 +1,14 @@
-export const useRequestAdd = (refreshTodos) => {
+import { ref, push } from 'firebase/database';
+import { db } from '../firebase';
+
+export const useRequestAdd = () => {
 	const requestAdd = (data) => {
-		fetch('http://localhost:3005/todos', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify(data),
-		})
-			.then((rawResponse) => rawResponse.json())
-			.then((response) => {
-				console.log('Задача добавлена');
-				refreshTodos();
-			});
+		const todoListDbRef = ref(db, 'todos');
+
+		push(todoListDbRef, data)
+		.then((response) => {
+			console.log('Задача добавлена');
+		});
 	};
 
 	return { requestAdd };

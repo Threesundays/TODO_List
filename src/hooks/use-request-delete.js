@@ -1,19 +1,19 @@
-import { useState } from 'react';
 
-export const useRequestDelete = (refreshTodos) => {
-	const [isDeleting, setIsDeleting] = useState(false);
+import { ref, remove } from 'firebase/database';
+import { db } from '../firebase';
+
+export const useRequestDelete = () => {
 
 	const requestDelete = (id) => {
-		setIsDeleting(true);
-		fetch(`http://localhost:3005/todos/${id}`, {
-			method: 'DELETE',
+		const editTodoListDbRef = ref(db, `todos/${id}`);
+
+		remove(editTodoListDbRef)
+		.then(() => {
+		  console.log('Задача удалена');
 		})
-			.then((rawResponse) => rawResponse.json())
-			.then((response) => {
-				console.log('Задача удалена');
-				refreshTodos();
-			})
-			.finally(() => setIsDeleting(false));
+		.catch((error) => {
+		  console.error('Ошибка при удалении задачи:', error.message);
+		});
 	};
 
 	return {

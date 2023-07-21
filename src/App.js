@@ -5,6 +5,7 @@ import { Input } from './conponents';
 import { useRequestAdd, useRequestDelete, useRequestGet, useRequestEdit } from './hooks';
 
 export const App = () => {
+	const [searchValue, setSearchValue] = useState('');
 	const [showForm, setShowForm] = useState(false);
 	const [inputEditValue, setInputEditValue] = useState('');
 
@@ -13,15 +14,16 @@ export const App = () => {
 	const [refreshTodosFlag, setRefreshTodosFlag] = useState(false);
 	const refreshTodos = () => setRefreshTodosFlag(!refreshTodosFlag);
 	const [isSorted, setIsSorted] = useState(false);
+	const [donstSort, setDonstSort] = useState();
 
 	const [editingTaskId, setEditingTaskId] = useState(null);
 
-	const { todos, setTodos } = useRequestGet(refreshTodosFlag);
-	const { requestAdd } = useRequestAdd(refreshTodos);
-	const { requestDelete } = useRequestDelete(refreshTodos);
-	const { requestEdit } = useRequestEdit(refreshTodos, setEditingTaskId);
+	const { todos, setTodos } = useRequestGet();
+	const { requestAdd } = useRequestAdd();
+	const { requestDelete } = useRequestDelete();
+	const { requestEdit } = useRequestEdit();
 
-	const [filteredTodos, setFilteredTodos] = useState(todos);
+	const [copyTodosList, setCopyTodosList] = useState([]);
 
 	const onSubmit = (event) => {
 		event.preventDefault();
@@ -39,9 +41,11 @@ export const App = () => {
 	const handleSorted = () => {
 		if (!isSorted) {
 			const sortedTodos = sortTodosByTitle(todos);
+			setDonstSort(todos);
 			setTodos(sortedTodos);
 			setIsSorted(true);
 		} else {
+			setTodos(donstSort);
 			refreshTodos();
 			setIsSorted(false);
 		}
@@ -54,10 +58,18 @@ export const App = () => {
 		setShowForm(!showForm);
 	};
 
+	const handleSearch = (value) => {
+		setSearchValue(value.toLowerCase());
+	};
 	useEffect(() => {
-		const filteredList = todos.filter((todo) => todo.title.toLowerCase().includes(searchInputValue));
-		setFilteredTodos(filteredList);
-	}, [searchInputValue, todos]);
+		console.log('todos:', todos);
+	  }, [todos]);
+	  
+
+	  useEffect(() => {
+		const filteredList = Object.entries(todos).filter(([, todo]) => todo.title.toLowerCase().includes(searchValue));
+		setCopyTodosList(filteredList);
+	  }, [searchValue, todos]);
 
 	return (
 		<div className={styles.app}>
@@ -76,14 +88,14 @@ export const App = () => {
 					name="search"
 					type="text"
 					placeholder="Поиск"
-					value={searchInputValue}
-					onChange={(event) => setSearchInputValue(event.target.value)}
+					value={searchValue}
+					onChange={(event) => handleSearch(event.target.value)}
 				/>
 			</form>
 			<button onClick={handleSorted}>Abc 🠗</button>
 			<ol className={styles.todoList}>
-				{filteredTodos.map(({ id, title }) => (
-					<li key={id}>
+			    {copyTodosList.map(([id, { title }]) => (
+          <li key={id}>
 						{title}
 						<button onClick={() => requestDelete(id)}>✘</button>
 						<button onClick={() => handleOpenEditForm(id, title)}>✎</button>

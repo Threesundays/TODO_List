@@ -1,21 +1,13 @@
+import { ref, set } from 'firebase/database';
+import { db } from '../firebase';
 
-
-export const useRequestEdit = (refreshTodos) => {
-
-
+export const useRequestEdit = () => {
 	const requestEdit = (id, data) => {
-		fetch(`http://localhost:3005/todos/${id}`, {
-			method: 'PUT',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify(data),
-		})
-			.then((rawResponse) => rawResponse.json())
-			.then((response) => {
-				console.log('Задача обновлена');
-				refreshTodos();
-			});
+		const editTodoListDbRef = ref(db, `todos/${id}`);
+
+		set(editTodoListDbRef, data).then((response) => {
+			console.log('Задача обновлена');
+		});
 	};
 
 	return { requestEdit };
